@@ -49,7 +49,7 @@ pip install -U cuda-python[all]
 pip install cuda-core[cu12]
 pip install cuda-cccl[cu12]
 pip install numba
-pip install cupy
+pip install cupy-cuda12x
 
 if [ $? -ne 0 ]; then
     echo "Error: Failed to install one or more packages. Please check the pip output above."
