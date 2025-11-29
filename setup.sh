@@ -45,7 +45,11 @@ pip install ipywidgets
 pip install bokeh
 pip install sympy
 pip install matplotlib
-
+pip install -U cuda-python[all]
+pip install cuda-core[cu12]
+pip install cuda-cccl[cu12]
+pip install numba
+pip install cupy
 
 if [ $? -ne 0 ]; then
     echo "Error: Failed to install one or more packages. Please check the pip output above."
