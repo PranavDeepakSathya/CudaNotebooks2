@@ -8,12 +8,7 @@ REPO_DIR_NAME=$(basename "$(pwd)")
 
 echo "Starting setup for repository: $REPO_DIR_NAME"
 
-# --- 1. Navigate up one directory to create the .venv outside the repo ---
-cd ..
-if [ $? -ne 0 ]; then
-    echo "Error: Could not navigate up to the parent directory. Aborting."
-    exit 1
-fi
+
 
 echo "Creating virtual environment at: $(pwd)/.venv"
 
