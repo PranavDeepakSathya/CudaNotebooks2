@@ -50,6 +50,9 @@ pip install cuda-core[cu12]
 pip install cuda-cccl[cu12]
 pip install numba
 pip install cupy-cuda12x
+pip install torch 
+pip install triton
+pip install nvidia-cutlass-dsl
 
 if [ $? -ne 0 ]; then
     echo "Error: Failed to install one or more packages. Please check the pip output above."
