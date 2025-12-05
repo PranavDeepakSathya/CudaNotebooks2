@@ -3,6 +3,9 @@
 #include<cuda.h> 
 #include<mma.h> 
 #include<cuda_bf16.h>
+#include <cuda/barrier>
+using barrier = cuda::barrier<cuda::thread_scope_block>;
+namespace cde = cuda::device::experimental;
 
 constexpr int M = 4096;
 constexpr int N = 4096;
@@ -20,10 +23,6 @@ constexpr int bK = 32;
 __global__ void matmul(__nv_bfloat16* A, __nv_bfloat16 *B, __nv_bfloat16 *C, 
                         const __grid_constant__ CUtensorMap tensor_map_A, const __grid_constant__ CUtensorMap tensor_map_B)
 {
-  __shared__ __nv_bfloat16 A0[bM][bK]; 
-  __shared__ __nv_bfloat16 B0[bK][bN]; 
-  __shared__ __nv_bfloat16 A1[bM][bK]; 
-  __shared__ __nv_bfloat16 B1[bK][bN]; 
 
 
 
