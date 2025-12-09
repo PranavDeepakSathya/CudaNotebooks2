@@ -23,8 +23,8 @@ constexpr int bK = 32;
 __global__ void matmul(__nv_bfloat16* A, __nv_bfloat16 *B, __nv_bfloat16 *C, 
                         const __grid_constant__ CUtensorMap tensor_map_A, const __grid_constant__ CUtensorMap tensor_map_B)
 {
-  __shared__ alignas(128) __nv_bfloat16 S0[(bM*bK) + (bK*bN)]; 
-  __shared__ alignas(128) __nv_bfloat16 S1[(bM*bK) + (bK*bN)]; 
+  __shared__ alignas(128) __nv_bfloat16 S0[2][(bM*bK) + (bK*bN)]; 
+  __shared__ alignas(128) __nv_bfloat16 S1[2][(bM*bK) + (bK*bN)]; 
 
   int t = threadIdx.x; 
   int b = blockIdx.x; 
