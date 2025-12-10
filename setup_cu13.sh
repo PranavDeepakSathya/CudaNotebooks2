@@ -38,16 +38,17 @@ fi
 
 # --- 4. Install the required packages ---
 echo "Installing packages: nvcc4jupyter, numpy..."
-
+pip install --upgrade pip 
 pip install nvcc4jupyter numpy
 pip install jupyter_client ipykernel
 pip install ipywidgets
 pip install bokeh
 pip install sympy
 pip install matplotlib
-pip install -U cuda-python[all]
+
 pip install cuda-core[cu13]
 pip install cuda-cccl[cu13]
+pip install -U cuda-python[all]
 pip install numba
 pip install cupy-cuda13x
 pip install torch 
