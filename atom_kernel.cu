@@ -70,7 +70,7 @@ __global__ void wmma_ker(const __grid_constant__ CUtensorMap tensorMapA,
     __nv_bfloat16* As = reinterpret_cast<__nv_bfloat16*>(raw_smem);
     __nv_bfloat16* Bs = reinterpret_cast<__nv_bfloat16*>(raw_smem + A_sz_bytes);
 
-    // Initialize Barrier
+    #pragma nv_diag_suppress static_var_with_dynamic_init
     __shared__ barrier bar;
     if (threadIdx.x == 0) {
         init(&bar, blockDim.x);
@@ -80,13 +80,14 @@ __global__ void wmma_ker(const __grid_constant__ CUtensorMap tensorMapA,
     barrier::arrival_token token;
 
     if (threadIdx.x == 0) {
+        int32_t tensor_coords[2] = {0, 0};
         ptx::cp_async_bulk_tensor(
             ptx::space_shared, ptx::space_global,
-            As, &tensorMapA, {0,0}, // Coordinates
+            As, &tensorMapA, tensor_coords, // Coordinates
             cuda::device::barrier_native_handle(bar)
         );
 
-        cuda::device::barrier_arrive_tx(bar, 1, A_sz_bytes);
+       token =cuda::device::barrier_arrive_tx(bar, 1, A_sz_bytes);
     }
     else
     {
@@ -95,7 +96,9 @@ __global__ void wmma_ker(const __grid_constant__ CUtensorMap tensorMapA,
 
     bar.wait(std::move(token));
 
-
+  if (threadIdx.x == 0) {
+    (&bar)->~barrier();
+  }
 }
 
 void cpu_matmul(const std::vector<float>& h_A, const std::vector<float>& h_B, std::vector<float>& h_C_ref) {
