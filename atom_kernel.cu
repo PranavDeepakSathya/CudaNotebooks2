@@ -1,4 +1,4 @@
-%%cuda
+
 #include <iostream>
 #include <vector>
 #include <random>
@@ -9,6 +9,9 @@
 #include <cuda_bf16.h>
 #include <cudaTypedefs.h> 
 #include <cuda.h>
+#include<cuda/barrier>
+namespace ptx = cuda::ptx;
+using barrier = cuda::barrier<cuda::thread_scope_block>;
 
 #define CUDA_CHECK(call) \
     do { \
@@ -57,7 +60,42 @@ __global__ void wmma_ker(const __grid_constant__ CUtensorMap tensorMapA,
                          const __grid_constant__ CUtensorMap tensorMapB, 
                          float *c) 
 {
+  
     extern __shared__ uint8_t raw_smem[];
+
+    // 1. Fix Pointer Math: Calculate offsets in bytes using raw_smem (uint8_t)
+    size_t A_sz_bytes = M * K * sizeof(__nv_bfloat16);
+    size_t B_sz_bytes = K * N * sizeof(__nv_bfloat16);
+
+    __nv_bfloat16* As = reinterpret_cast<__nv_bfloat16*>(raw_smem);
+    __nv_bfloat16* Bs = reinterpret_cast<__nv_bfloat16*>(raw_smem + A_sz_bytes);
+
+    // Initialize Barrier
+    __shared__ barrier bar;
+    if (threadIdx.x == 0) {
+        init(&bar, blockDim.x);
+    }
+    __syncthreads();
+    
+    barrier::arrival_token token;
+
+    if (threadIdx.x == 0) {
+        ptx::cp_async_bulk_tensor(
+            ptx::space_shared, ptx::space_global,
+            As, &tensorMapA, {0,0}, // Coordinates
+            cuda::device::barrier_native_handle(bar)
+        );
+
+        cuda::device::barrier_arrive_tx(bar, 1, A_sz_bytes);
+    }
+    else
+    {
+      token = bar.arrive();
+    }
+
+    bar.wait(std::move(token));
+
+
 }
 
 void cpu_matmul(const std::vector<float>& h_A, const std::vector<float>& h_B, std::vector<float>& h_C_ref) {
