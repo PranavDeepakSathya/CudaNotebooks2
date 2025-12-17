@@ -53,6 +53,7 @@ pip install cupy-cuda12x
 pip install torch 
 pip install triton
 pip install nvidia-cutlass-dsl
+pip install -U git+https://github.com/NTT123/cute-viz.git
 
 if [ $? -ne 0 ]; then
     echo "Error: Failed to install one or more packages. Please check the pip output above."
