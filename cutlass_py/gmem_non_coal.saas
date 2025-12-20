@@ -1,0 +1,283 @@
+	.target	sm_120a
+
+	.elftype	@"ET_EXEC"
+
+
+//--------------------- .debug_frame              --------------------------
+	.section	.debug_frame,"",@progbits
+.debug_frame:
+        /*0000*/ 	.byte	0xff, 0xff, 0xff, 0xff, 0x24, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff
+        /*0010*/ 	.byte	0xff, 0xff, 0xff, 0xff, 0x03, 0x00, 0x04, 0x7c, 0xff, 0xff, 0xff, 0xff, 0x0f, 0x0c, 0x81, 0x80
+        /*0020*/ 	.byte	0x80, 0x28, 0x00, 0x08, 0xff, 0x81, 0x80, 0x28, 0x08, 0x81, 0x80, 0x80, 0x28, 0x00, 0x00, 0x00
+        /*0030*/ 	.byte	0xff, 0xff, 0xff, 0xff, 0x2c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+        /*0040*/ 	.byte	0x00, 0x00, 0x00, 0x00
+        /*0044*/ 	.dword	kernel_cutlass_patterned_access_tensorptrf32gmemalign128o2684354561_tensorptrf32gmemalign128o2684354561_0
+        /*004c*/ 	.byte	0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x44, 0x00, 0x00, 0x00, 0x04, 0x04, 0x00
+        /*005c*/ 	.byte	0x00, 0x00, 0x0c, 0x81, 0x80, 0x80, 0x28, 0x00, 0x00, 0x00, 0x00, 0x00
+
+
+//--------------------- .note.nv.tkinfo           --------------------------
+	.section	.note.nv.tkinfo,"",@"SHT_NOTE"
+	.sectionflags	@"SHF_NOTE_NV_TKINFO"
+	.tkinfo
+        /*0018*/ 	.word	0x00000081
+        /*0030*/ 	.string	""
+        /*0030*/ 	.string	"ptxas"
+        /*0030*/ 	.string	"Cuda compilation tools, release 12.9, V12.9.83"
+        /*0030*/ 	.string	"Build system must define TOOLS_VERSION_EXTENDED"
+        /*0030*/ 	.string	"-O 3 -arch sm_120a "
+
+
+
+//--------------------- .note.nv.cuver            --------------------------
+	.section	.note.nv.cuver,"",@"SHT_NOTE"
+	.sectionflags	@"SHF_NOTE_NV_CUVER"
+        /*0018*/ 	.short	0x0001
+        /*001a*/ 	.short	0x0078
+        /*001c*/ 	.short	0x0001
+        /*001e*/ 	.short	0x0000
+        /*0020*/ 	.short	0x0001
+        /*0022*/ 	.short	0x0000
+
+
+//--------------------- .nv.info                  --------------------------
+	.section	.nv.info,"",@"SHT_CUDA_INFO"
+	.align	4
+
+
+	//----- nvinfo : EIATTR_REGCOUNT
+	.align		4
+        /*0000*/ 	.byte	0x04, 0x2f
+        /*0002*/ 	.short	(.L_1 - .L_0)
+	.align		4
+.L_0:
+        /*0004*/ 	.word	index@(kernel_cutlass_patterned_access_tensorptrf32gmemalign128o2684354561_tensorptrf32gmemalign128o2684354561_0)
+        /*0008*/ 	.word	0x0000000a
+
+
+	//----- nvinfo : EIATTR_FRAME_SIZE
+	.align		4
+.L_1:
+        /*000c*/ 	.byte	0x04, 0x11
+        /*000e*/ 	.short	(.L_3 - .L_2)
+	.align		4
+.L_2:
+        /*0010*/ 	.word	index@(kernel_cutlass_patterned_access_tensorptrf32gmemalign128o2684354561_tensorptrf32gmemalign128o2684354561_0)
+        /*0014*/ 	.word	0x00000000
+
+
+	//----- nvinfo : EIATTR_MIN_STACK_SIZE
+	.align		4
+.L_3:
+        /*0018*/ 	.byte	0x04, 0x12
+        /*001a*/ 	.short	(.L_5 - .L_4)
+	.align		4
+.L_4:
+        /*001c*/ 	.word	index@(kernel_cutlass_patterned_access_tensorptrf32gmemalign128o2684354561_tensorptrf32gmemalign128o2684354561_0)
+        /*0020*/ 	.word	0x00000000
+.L_5:
+
+
+//--------------------- .nv.info.kernel_cutlass_patterned_access_tensorptrf32gmemalign128o2684354561_tensorptrf32gmemalign128o2684354561_0 --------------------------
+	.section	.nv.info.kernel_cutlass_patterned_access_tensorptrf32gmemalign128o2684354561_tensorptrf32gmemalign128o2684354561_0,"",@"SHT_CUDA_INFO"
+	.sectionflags	@""
+	.align	4
+
+
+	//----- nvinfo : EIATTR_CUDA_API_VERSION
+	.align		4
+        /*0000*/ 	.byte	0x04, 0x37
+        /*0002*/ 	.short	(.L_7 - .L_6)
+.L_6:
+        /*0004*/ 	.word	0x00000081
+
+
+	//----- nvinfo : EIATTR_KPARAM_INFO
+	.align		4
+.L_7:
+        /*0008*/ 	.byte	0x04, 0x17
+        /*000a*/ 	.short	(.L_9 - .L_8)
+.L_8:
+        /*000c*/ 	.word	0x00000000
+        /*0010*/ 	.short	0x0001
+        /*0012*/ 	.short	0x0008
+        /*0014*/ 	.byte	0x00, 0xf0, 0x21, 0x00
+
+
+	//----- nvinfo : EIATTR_KPARAM_INFO
+	.align		4
+.L_9:
+        /*0018*/ 	.byte	0x04, 0x17
+        /*001a*/ 	.short	(.L_11 - .L_10)
+.L_10:
+        /*001c*/ 	.word	0x00000000
+        /*0020*/ 	.short	0x0000
+        /*0022*/ 	.short	0x0000
+        /*0024*/ 	.byte	0x00, 0xf0, 0x21, 0x00
+
+
+	//----- nvinfo : EIATTR_SPARSE_MMA_MASK
+	.align		4
+.L_11:
+        /*0028*/ 	.byte	0x03, 0x50
+        /*002a*/ 	.short	0x0000
+
+
+	//----- nvinfo : EIATTR_MAXREG_COUNT
+	.align		4
+        /*002c*/ 	.byte	0x03, 0x1b
+        /*002e*/ 	.short	0x0040
+
+
+	//----- nvinfo : EIATTR_VRC_CTA_INIT_COUNT
+	.align		4
+        /*0030*/ 	.byte	0x02, 0x4a
+	.zero		1
+	.zero		1
+
+
+	//----- nvinfo : EIATTR_EXIT_INSTR_OFFSETS
+	.align		4
+        /*0034*/ 	.byte	0x04, 0x1c
+        /*0036*/ 	.short	(.L_13 - .L_12)
+
+
+	//   ....[0]....
+.L_12:
+        /*0038*/ 	.word	0x00000110
+
+
+	//----- nvinfo : EIATTR_REQNTID
+	.align		4
+.L_13:
+        /*003c*/ 	.byte	0x04, 0x10
+        /*003e*/ 	.short	(.L_15 - .L_14)
+.L_14:
+        /*0040*/ 	.word	0x00000400
+        /*0044*/ 	.word	0x00000001
+        /*0048*/ 	.word	0x00000001
+
+
+	//----- nvinfo : EIATTR_CBANK_PARAM_SIZE
+	.align		4
+.L_15:
+        /*004c*/ 	.byte	0x03, 0x19
+        /*004e*/ 	.short	0x0010
+
+
+	//----- nvinfo : EIATTR_PARAM_CBANK
+	.align		4
+        /*0050*/ 	.byte	0x04, 0x0a
+        /*0052*/ 	.short	(.L_17 - .L_16)
+	.align		4
+.L_16:
+        /*0054*/ 	.word	index@(.nv.constant0.kernel_cutlass_patterned_access_tensorptrf32gmemalign128o2684354561_tensorptrf32gmemalign128o2684354561_0)
+        /*0058*/ 	.short	0x0380
+        /*005a*/ 	.short	0x0010
+
+
+	//----- nvinfo : EIATTR_SW_WAR
+	.align		4
+.L_17:
+        /*005c*/ 	.byte	0x04, 0x36
+        /*005e*/ 	.short	(.L_19 - .L_18)
+.L_18:
+        /*0060*/ 	.word	0x00000000
+.L_19:
+
+
+//--------------------- .nv.compat                --------------------------
+	.section	.nv.compat,"",@"SHT_CUDA_COMPAT_INFO"
+	.align	4
+        /*0000*/ 	.byte	0x02, 0x02, 0x01, 0x00, 0x02, 0x05, 0x05, 0x00, 0x02, 0x03, 0x00, 0x00, 0x02, 0x06, 0x01, 0x00
+
+
+//--------------------- .nv.callgraph             --------------------------
+	.section	.nv.callgraph,"",@"SHT_CUDA_CALLGRAPH"
+	.align	4
+	.sectionentsize	8
+	.align		4
+        /*0000*/ 	.word	0x00000000
+	.align		4
+        /*0004*/ 	.word	0xffffffff
+	.align		4
+        /*0008*/ 	.word	0x00000000
+	.align		4
+        /*000c*/ 	.word	0xfffffffe
+	.align		4
+        /*0010*/ 	.word	0x00000000
+	.align		4
+        /*0014*/ 	.word	0xfffffffd
+	.align		4
+        /*0018*/ 	.word	0x00000000
+	.align		4
+        /*001c*/ 	.word	0xfffffffc
+
+
+//--------------------- .text.kernel_cutlass_patterned_access_tensorptrf32gmemalign128o2684354561_tensorptrf32gmemalign128o2684354561_0 --------------------------
+	.section	.text.kernel_cutlass_patterned_access_tensorptrf32gmemalign128o2684354561_tensorptrf32gmemalign128o2684354561_0,"ax",@progbits
+	.align	128
+        .global         kernel_cutlass_patterned_access_tensorptrf32gmemalign128o2684354561_tensorptrf32gmemalign128o2684354561_0
+        .type           kernel_cutlass_patterned_access_tensorptrf32gmemalign128o2684354561_tensorptrf32gmemalign128o2684354561_0,@function
+        .size           kernel_cutlass_patterned_access_tensorptrf32gmemalign128o2684354561_tensorptrf32gmemalign128o2684354561_0,(.L_x_1 - kernel_cutlass_patterned_access_tensorptrf32gmemalign128o2684354561_tensorptrf32gmemalign128o2684354561_0)
+        .other          kernel_cutlass_patterned_access_tensorptrf32gmemalign128o2684354561_tensorptrf32gmemalign128o2684354561_0,@"STO_CUDA_ENTRY STV_DEFAULT"
+kernel_cutlass_patterned_access_tensorptrf32gmemalign128o2684354561_tensorptrf32gmemalign128o2684354561_0:
+.text.kernel_cutlass_patterned_access_tensorptrf32gmemalign128o2684354561_tensorptrf32gmemalign128o2684354561_0:
+        /*0000*/                   LDC R1, c[0x0][0x37c] ;
+        /*0010*/                   S2R R4, SR_TID.X ;
+        /*0020*/                   S2UR UR6, SR_CTAID.X ;
+        /*0030*/                   HFMA2 R7, -RZ, RZ, 0, 1.33514404296875e-05 ;
+        /*0040*/                   LDCU.64 UR4, c[0x0][0x358] ;
+        /*0050*/                   LDC R5, c[0x0][0x360] ;
+        /*0060*/                   LDC.64 R2, c[0x0][0x380] ;
+        /*0070*/                   SHF.R.U32.HI R0, RZ, 0x5, R4 ;
+        /*0080*/                   IMAD R4, R4, R7, 0xa0 ;
+        /*0090*/                   IMAD R5, R5, UR6, R0 ;
+        /*00a0*/                   LOP3.LUT R4, R4, 0x3e0, RZ, 0xc0, !PT ;
+        /*00b0*/                   IADD3 R7, PT, PT, R4, R5, RZ ;
+        /*00c0*/                   LDC.64 R4, c[0x0][0x388] ;
+        /*00d0*/                   IMAD.WIDE R2, R7, 0x4, R2 ;
+        /*00e0*/                   LDG.E R3, desc[UR4][R2.64] ;
+        /*00f0*/                   IMAD.WIDE R4, R7, 0x4, R4 ;
+        /*0100*/                   STG.E desc[UR4][R4.64], R3 ;
+        /*0110*/                   EXIT ;
+.L_x_0:
+        /*0120*/                   BRA `(.L_x_0);
+        /*0130*/                   NOP;
+        /*0140*/                   NOP;
+        /*0150*/                   NOP;
+        /*0160*/                   NOP;
+        /*0170*/                   NOP;
+        /*0180*/                   NOP;
+        /*0190*/                   NOP;
+        /*01a0*/                   NOP;
+        /*01b0*/                   NOP;
+        /*01c0*/                   NOP;
+        /*01d0*/                   NOP;
+        /*01e0*/                   NOP;
+        /*01f0*/                   NOP;
+.L_x_1:
+
+
+//--------------------- .nv.shared.reserved.0     --------------------------
+	.section	.nv.shared.reserved.0,"aw",@nobits
+	.weak		__nv_reservedSMEM_offset_0_alias
+	.size		__nv_reservedSMEM_offset_0_alias, 0, 64
+	.other		__nv_reservedSMEM_offset_0_alias,@"STO_CUDA_RESERVED_SHARED STV_DEFAULT"
+__nv_reservedSMEM_offset_0_alias:
+	.zero		0
+	.zero		64
+
+
+//--------------------- .nv.constant0.kernel_cutlass_patterned_access_tensorptrf32gmemalign128o2684354561_tensorptrf32gmemalign128o2684354561_0 --------------------------
+	.section	.nv.constant0.kernel_cutlass_patterned_access_tensorptrf32gmemalign128o2684354561_tensorptrf32gmemalign128o2684354561_0,"a",@progbits
+	.sectionflags	@""
+	.align	4
+.nv.constant0.kernel_cutlass_patterned_access_tensorptrf32gmemalign128o2684354561_tensorptrf32gmemalign128o2684354561_0:
+	.zero		912
+
+
+//--------------------- SYMBOLS --------------------------
+
+	.type		.nv.reservedSmem.offset0,@object
+	.size		.nv.reservedSmem.offset0,0x4
