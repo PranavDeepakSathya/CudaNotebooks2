@@ -112,6 +112,8 @@ class GemmNode:
     # Initialize map: Tile_ID -> None (Placeholder for future strategies)
     # The domain is strictly defined by the Topology's tiling (0 to q^3 - 1)
     self.children = {i: None for i in range(self.topology.N_tiles)}
+    self.parent = None
+    self.parent_tile_id = None 
 
   def set_child(self, tile_id: int, subtopology: 'GemmTopology', sub_exec_type: ExecutionType = ExecutionType.PARALLEL):
     """
@@ -135,6 +137,8 @@ class GemmNode:
     # 3. Create and Link the Node
     # We wrap the topology in a Node to allow further recursion down the line
     self.children[tile_id] = GemmNode(subtopology, sub_exec_type)
+    self.children[tile_id].parent = self.topology
+    self.children[tile_id].parent_tile_id = tile_id
 
   def __repr__(self):
       # Count how many children are actually defined (not None)
