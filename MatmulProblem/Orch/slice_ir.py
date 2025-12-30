@@ -5,6 +5,7 @@ import math
 from enum import Enum, auto
 from .biject import Bijection
 from .gemmtop import ExecutionType, GemmNode, GemmTopology
+import collections
 
 class SliceIR_node: 
   def __init__(self, rank, shape, slice, depth_id, global_offset, execution_policy):
@@ -91,7 +92,45 @@ class SliceIR_tree:
     ir_node.children = temp_children
 
     return ir_node
-  
+  def walk(self, strategy: str = 'dfs') -> Iterator[SliceIR_node]:
+    """
+    Traverses the tree and yields *only* leaf nodes.
+    
+    Args:
+        strategy: 'dfs' (Depth-First Search) or 'bfs' (Breadth-First Search).
+                  'dfs' preserves the rank execution order strictly (depth first).
+                  'bfs' yields leaves layer by layer.
+    """
+    if self.root is None:
+        return
+
+    # Use a deque for O(1) pops from both ends
+    container = collections.deque([self.root])
+    
+    if strategy.lower() == 'bfs':
+        while container:
+            node = container.popleft() # FIFO
+            
+            if not node.children:
+                yield node
+            else:
+                # Add all children to the back of the queue
+                container.extend(node.children)
+                
+    elif strategy.lower() == 'dfs':
+        while container:
+            node = container.pop() # LIFO (Stack)
+            
+            if not node.children:
+                yield node
+            else:
+                # We extend the stack with children in REVERSE order.
+                # Why? Because if children are [A, B, C], we push C, B, A.
+                # Then we pop A first, preserving the left-to-right (rank) order.
+                container.extend(reversed(node.children))
+    else:
+        raise ValueError(f"Unknown strategy: {strategy}. Use 'bfs' or 'dfs'.")
+
 def generate_dot_source(ir_tree) -> str:
   """
   Generates a Graphviz DOT string from a SliceIR_tree.
@@ -142,4 +181,3 @@ def generate_dot_source(ir_tree) -> str:
   lines.append("}")
   return "\n".join(lines)
 
-# --- Usage Example ---
