@@ -49,8 +49,8 @@
         const __grid_constant__ CUtensorMap map_B) 
     {
     
-    __shared__ alignas(128) As[BM][BK];
-    __shared__ alignas(128) Bs[BK][BN];
+    __shared__ alignas(128) nv_bfloat16 As[BM][BK];
+    __shared__ alignas(128) nv_bfloat16 Bs[BK][BN];
 
     __shared__ barrier bar;
 
@@ -70,20 +70,21 @@
 
     int gm = b/GN; 
     int gn = b % GN;
-     
+
 
     for (int bk = 0; bk < K; bk += BK)
     {
-        bm = gm*BM; 
-        bn = gn*BN;
+        int bm = gm*BM; 
+        int bn = gn*BN;
+        barrier::arrival_token token; 
 
         if (is_elected())
         {
-            barrier::arrival_token token; 
-            int32_t a_coords = {bm,bk};
-            int32_t b_coords = {bk,bn};
+            
+            int32_t a_coords[2] = {bk,bm};
+            int32_t b_coords[2] = {bn,bk};
             ptx::cp_async_bulk_tensor(ptx::space_shared, ptx::space_global, &As, &map_A, a_coords, cuda::device::barrier_native_handle(bar));
-            ptx::cp_async_bulk_tensor(ptx::space_shared, ptx::space_global, &Bs, &map_B, b_coords, cuda::device::barrier_native_hande(bar));
+            ptx::cp_async_bulk_tensor(ptx::space_shared, ptx::space_global, &Bs, &map_B, b_coords, cuda::device::barrier_native_handle(bar));
             token = cuda::device::barrier_arrive_tx(bar, 1, sizeof(As)+sizeof(Bs));
         }
         else
