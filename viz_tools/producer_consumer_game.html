@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Karyamorph Game Engine V3</title>
+    <style>
+        :root {
+            --bg: #121212;
+            --grid-line: #2a2a2a;
+            --text: #e0e0e0;
+            --panel: #1e1e1e;
+            --error: #ff4444;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', 'Consolas', monospace;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        /* --- Top Configuration Bar --- */
+        .config-bar {
+            background-color: var(--panel);
+            padding: 10px 15px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            font-size: 13px;
+        }
+
+        .group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-right: 15px;
+            border-right: 1px solid #333;
+        }
+        .group:last-child { border-right: none; }
+
+        input[type="number"] {
+            background: #000;
+            border: 1px solid #444;
+            color: white;
+            padding: 4px;
+            width: 50px;
+            border-radius: 4px;
+        }
+
+        button {
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover { background: #444; }
+
+        /* --- Palette Area --- */
+        .palette-area {
+            background-color: #181818;
+            padding: 10px 15px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            gap: 30px;
+            overflow-x: auto;
+        }
+
+        .actor-column {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .actor-column h4 { margin: 0 0 5px 0; font-size: 11px; text-transform: uppercase; color: #888; }
+        
+        .actor-list {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .actor-card {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #252525;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid #333;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .actor-card:hover { border-color: #666; }
+        .actor-card.active-p { border-color: tomato; box-shadow: 0 0 5px rgba(255, 99, 71, 0.3); }
+        .actor-card.active-c { border-color: cyan; box-shadow: 0 0 5px rgba(0, 255, 255, 0.3); }
+
+        input[type="color"] {
+            width: 20px;
+            height: 20px;
+            border: none;
+            background: none;
+            padding: 0;
+            cursor: pointer;
+        }
+
+        .actor-label { font-size: 12px; font-weight: bold; }
+
+        /* --- Canvas --- */
+        .canvas-container {
+            flex-grow: 1;
+            overflow: auto;
+            position: relative;
+            cursor: crosshair;
+            background-image: 
+                linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+                linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+            background-size: 40px 40px; 
+        }
+
+        #cursor-guide {
+            position: absolute;
+            pointer-events: none;
+            border: 2px dashed rgba(255, 255, 255, 0.5);
+            background-color: rgba(255, 255, 255, 0.1);
+            display: none;
+            z-index: 5;
+        }
+
+        .status-panel {
+            position: absolute;
+            bottom: 20px;
+            right: 30px;
+            background: rgba(0,0,0,0.85);
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-size: 12px;
+            pointer-events: none;
+            text-align: right;
+            border: 1px solid #333;
+        }
+        #status-msg { color: #888; font-style: italic; }
+        .error-flash { color: var(--error) !important; font-weight: bold; font-style: normal !important; }
+
+    </style>
+</head>
+<body>
+
+    <div class="config-bar">
+        <div class="group">
+            <label>Producers (M):</label>
+            <input type="number" id="numProds" value="2" min="1" max="10">
+        </div>
+        <div class="group">
+            <label>Consumers (N):</label>
+            <input type="number" id="numCons" value="2" min="1" max="10">
+        </div>
+        <div class="group">
+            <button onclick="setupActors()">Apply & Reset</button>
+        </div>
+        <div class="group" style="border-left: 1px solid #333; padding-left: 15px;">
+            <label>Rows:</label>
+            <input type="number" id="nRows" value="8">
+        </div>
+        <div class="group">
+            <label>Cols:</label>
+            <input type="number" id="nCols" value="100">
+        </div>
+        <div class="group">
+            <label>P-Len:</label>
+            <input type="number" id="pLen" value="4">
+        </div>
+        <div class="group">
+            <label>C-Len:</label>
+            <input type="number" id="cLen" value="4">
+        </div>
+        <button onclick="clearCanvas()">Clear Grid</button>
+    </div>
+
+    <div class="palette-area">
+        <div class="actor-column">
+            <h4>Left Click (Producers)</h4>
+            <div class="actor-list" id="p-list"></div>
+        </div>
+        <div class="actor-column" style="margin-left: 20px; border-left: 1px solid #333; padding-left: 20px;">
+            <h4>Right Click (Consumers)</h4>
+            <div class="actor-list" id="c-list"></div>
+        </div>
+    </div>
+
+    <div class="canvas-container" id="container">
+        <canvas id="gridCanvas"></canvas>
+        <div id="cursor-guide"></div>
+        
+        <div class="status-panel">
+            <div style="margin-bottom: 5px; color: #555; font-size: 10px;">REFEREE LOG</div>
+            <div id="status-msg">Ready to play.</div>
+        </div>
+    </div>
+
+<script>
+    // --- Config ---
+    const CELL_SIZE = 40;
+    const ROW_HEIGHT = 40;
+
+    // --- State ---
+    let producers = [];
+    let consumers = [];
+    let activePIndex = 0;
+    let activeCIndex = 0;
+    let blocks = []; 
+
+    // --- DOM ---
+    const canvas = document.getElementById('gridCanvas');
+    const ctx = canvas.getContext('2d');
+    const guide = document.getElementById('cursor-guide');
+    const container = document.getElementById('container');
+    const statusMsg = document.getElementById('status-msg');
+    
+    // --- Initialization ---
+    function setupActors() {
+        const M = parseInt(document.getElementById('numProds').value);
+        const N = parseInt(document.getElementById('numCons').value);
+
+        producers = [];
+        consumers = [];
+
+        for(let i=0; i<M; i++) {
+            const hue = 0 + (40/M)*i; 
+            producers.push({ id: i, label: `P${i}`, color: `hsl(${hue}, 80%, 50%)` });
+        }
+        for(let i=0; i<N; i++) {
+            const hue = 180 + (50/N)*i;
+            consumers.push({ id: i, label: `C${i}`, color: `hsl(${hue}, 80%, 50%)` });
+        }
+
+        activePIndex = 0;
+        activeCIndex = 0;
+        renderPalette();
+        clearCanvas();
+    }
+
+    function renderPalette() {
+        const pList = document.getElementById('p-list');
+        const cList = document.getElementById('c-list');
+        pList.innerHTML = '';
+        cList.innerHTML = '';
+
+        producers.forEach((p, idx) => {
+            const card = createCard(p, idx === activePIndex, 'active-p', () => setActiveP(idx));
+            pList.appendChild(card);
+        });
+
+        consumers.forEach((c, idx) => {
+            const card = createCard(c, idx === activeCIndex, 'active-c', () => setActiveC(idx));
+            cList.appendChild(card);
+        });
+    }
+
+    function createCard(actor, isActive, activeClass, onClick) {
+        const card = document.createElement('div');
+        card.className = `actor-card ${isActive ? activeClass : ''}`;
+        card.onclick = onClick;
+        const colorInp = document.createElement('input');
+        colorInp.type = 'color';
+        colorInp.value = hslToHex(actor.color);
+        colorInp.oninput = (e) => { actor.color = e.target.value; draw(); };
+        const lbl = document.createElement('span');
+        lbl.className = 'actor-label';
+        lbl.innerText = actor.label;
+        card.appendChild(colorInp);
+        card.appendChild(lbl);
+        return card;
+    }
+
+    function setActiveP(idx) { activePIndex = idx; renderPalette(); }
+    function setActiveC(idx) { activeCIndex = idx; renderPalette(); }
+    
+    function clearCanvas() { blocks = []; resize(); log("Grid Cleared."); }
+    function resize() {
+        const cols = parseInt(document.getElementById('nCols').value);
+        const rows = parseInt(document.getElementById('nRows').value);
+        canvas.width = cols * CELL_SIZE;
+        canvas.height = rows * ROW_HEIGHT;
+        container.style.backgroundSize = `${CELL_SIZE}px ${ROW_HEIGHT}px`;
+        draw();
+    }
+
+    // --- GAME LOGIC (The Referee) ---
+
+    function canPlaceBlock(newBlock) {
+        // newBlock = { type, actorIndex, row, col, len }
+
+        // RULE 1: Physical Overlap in Buffer (Row)
+        const rowBlocks = blocks.filter(b => b.row === newBlock.row);
+        for(let b of rowBlocks) {
+            // Check intersection [col, col+len] vs [b.col, b.col+len]
+            if (intervalsOverlap(newBlock.col, newBlock.len, b.col, b.len)) {
+                return { valid: false, reason: "Physical Overlap! Space occupied." };
+            }
+        }
+
+        // Gather Sorted Row Blocks for Sequence Logic
+        // We simulate inserting the new block to check neighbors
+        let simRow = [...rowBlocks, newBlock];
+        simRow.sort((a,b) => a.col - b.col);
+        const newIdx = simRow.indexOf(newBlock);
+        
+        const prev = newIdx > 0 ? simRow[newIdx-1] : null;
+        const next = newIdx < simRow.length - 1 ? simRow[newIdx+1] : null;
+
+        // RULE 2: Buffer Genesis (Must start with P)
+        // If this block is the very first one (index 0), it MUST be P.
+        if (newIdx === 0 && newBlock.type === 'C') {
+            return { valid: false, reason: "Genesis Rule: Buffer must start with Producer." };
+        }
+
+        // RULE 3: Alternation (P -> C -> P -> C)
+        // Check Left Neighbor
+        if (prev) {
+            if (prev.type === newBlock.type) {
+                return { valid: false, reason: `Alternation Rule: Cannot place ${newBlock.type} after ${prev.type}.` };
+            }
+        }
+        // Check Right Neighbor
+        if (next) {
+            if (next.type === newBlock.type) {
+                return { valid: false, reason: `Alternation Rule: Cannot place ${newBlock.type} before ${next.type}.` };
+            }
+        }
+
+        // RULE 4: Worker Exclusivity (The Ubiquity Ban)
+        // Check ALL blocks for the same actor (Producer X or Consumer Y)
+        // They cannot be active in ANY row during this time interval.
+        const sameActorBlocks = blocks.filter(b => b.type === newBlock.type && b.actorIndex === newBlock.actorIndex);
+        for(let b of sameActorBlocks) {
+            if (intervalsOverlap(newBlock.col, newBlock.len, b.col, b.len)) {
+                // Determine label for error message
+                const actorLabel = newBlock.type === 'P' ? producers[newBlock.actorIndex].label : consumers[newBlock.actorIndex].label;
+                return { valid: false, reason: `Ubiquity Ban: ${actorLabel} is busy elsewhere!` };
+            }
+        }
+
+        return { valid: true };
+    }
+
+    function intervalsOverlap(c1, l1, c2, l2) {
+        // Start1, End1 (exclusive), Start2, End2 (exclusive)
+        const s1 = c1, e1 = c1 + l1;
+        const s2 = c2, e2 = c2 + l2;
+        return Math.max(s1, s2) < Math.min(e1, e2);
+    }
+
+    function log(msg, isError=false) {
+        statusMsg.innerText = msg;
+        if(isError) {
+            statusMsg.className = "error-flash";
+            setTimeout(() => statusMsg.className = "", 1000); // Remove flash after 1s
+        } else {
+            statusMsg.className = "";
+        }
+    }
+
+    // --- Draw ---
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Row Labels
+        const rows = parseInt(document.getElementById('nRows').value);
+        ctx.font = "12px Consolas";
+        ctx.textAlign = "left";
+        ctx.textBaseline = "middle";
+        for(let r=0; r<rows; r++) {
+            ctx.fillStyle = "#333";
+            ctx.fillText(`B${r}`, 5, r*ROW_HEIGHT + ROW_HEIGHT/2);
+        }
+
+        blocks.forEach(b => {
+            const x = b.col * CELL_SIZE;
+            const y = b.row * ROW_HEIGHT;
+            const w = b.len * CELL_SIZE;
+            const h = ROW_HEIGHT - 4;
+
+            let color = '#555';
+            let label = '?';
+            if (b.type === 'P') {
+                const a = producers[b.actorIndex];
+                if(a) { color = a.color; label = a.label; }
+            } else {
+                const a = consumers[b.actorIndex];
+                if(a) { color = a.color; label = a.label; }
+            }
+
+            ctx.fillStyle = color;
+            ctx.fillRect(x+1, y+2, w-2, h);
+            ctx.strokeStyle = "rgba(0,0,0,0.4)";
+            ctx.lineWidth = 1;
+            ctx.strokeRect(x+1, y+2, w-2, h);
+
+            ctx.fillStyle = "white";
+            ctx.shadowColor = "black";
+            ctx.shadowBlur = 2;
+            ctx.textAlign = "center";
+            ctx.fillText(label, x + w/2, y + h/2);
+            ctx.shadowBlur = 0;
+        });
+    }
+
+    // --- Inputs ---
+    function getGridPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        return { 
+            row: Math.floor((e.clientY - rect.top) / ROW_HEIGHT), 
+            col: Math.floor((e.clientX - rect.left) / CELL_SIZE) 
+        };
+    }
+
+    canvas.addEventListener('mousedown', (e) => {
+        const { row, col } = getGridPos(e);
+        const maxCols = parseInt(document.getElementById('nCols').value);
+        const maxRows = parseInt(document.getElementById('nRows').value);
+        if(col < 0 || col >= maxCols || row < 0 || row >= maxRows) return;
+
+        let type, actorIndex, len;
+        if (e.button === 2) { 
+            type = 'C'; actorIndex = activeCIndex; 
+            len = parseInt(document.getElementById('cLen').value);
+        } else {
+            type = 'P'; actorIndex = activePIndex; 
+            len = parseInt(document.getElementById('pLen').value);
+        }
+
+        const newBlock = { type, actorIndex, row, col, len };
+        
+        // CHECK RULES
+        const result = canPlaceBlock(newBlock);
+        
+        if (result.valid) {
+            blocks.push(newBlock);
+            log(`Placed ${type === 'P' ? 'Producer' : 'Consumer'}`);
+            draw();
+        } else {
+            log(result.reason, true);
+        }
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+        const { row, col } = getGridPos(e);
+        const len = parseInt(document.getElementById('pLen').value); // approximation for guide
+        const maxCols = parseInt(document.getElementById('nCols').value);
+        
+        if (col >= 0 && col < maxCols) {
+            guide.style.display = 'flex';
+            guide.style.left = (col * CELL_SIZE) + 'px';
+            guide.style.top = (row * ROW_HEIGHT) + 'px';
+            guide.style.width = (len * CELL_SIZE) + 'px';
+            guide.style.height = ROW_HEIGHT + 'px';
+        } else {
+            guide.style.display = 'none';
+        }
+    });
+    
+    canvas.addEventListener('mouseleave', () => { guide.style.display = 'none'; });
+    canvas.addEventListener('contextmenu', e => e.preventDefault());
+    
+    document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+            blocks.pop();
+            draw();
+            log("Undo");
+        }
+    });
+    
+    function hslToHex(hslStr) {
+        if(hslStr.startsWith('#')) return hslStr;
+        const parts = hslStr.match(/\d+/g);
+        if(!parts) return "#ff0000";
+        let h = parseInt(parts[0]), s = parseInt(parts[1])/100, l = parseInt(parts[2])/100;
+        let c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs(((h / 60) % 2) - 1)), m = l - c / 2, r = 0, g = 0, b = 0;
+        if (0 <= h && h < 60) { r = c; g = x; b = 0; }
+        else if (60 <= h && h < 120) { r = x; g = c; b = 0; }
+        else if (120 <= h && h < 180) { r = 0; g = c; b = x; }
+        else if (180 <= h && h < 240) { r = 0; g = x; b = c; }
+        else if (240 <= h && h < 300) { r = x; g = 0; b = c; }
+        else if (300 <= h && h < 360) { r = c; g = 0; b = x; }
+        r = Math.round((r + m) * 255).toString(16).padStart(2,'0');
+        g = Math.round((g + m) * 255).toString(16).padStart(2,'0');
+        b = Math.round((b + m) * 255).toString(16).padStart(2,'0');
+        return `#${r}${g}${b}`;
+    }
+
+    setupActors();
+</script>
+</body>
+</html>
